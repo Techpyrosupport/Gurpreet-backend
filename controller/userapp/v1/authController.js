@@ -76,10 +76,10 @@ const register = async (req,res) =>{
 const login = async (req, res) => {
     try {
       let {
-        username, password
+        username, password, phone
       } = req.body;
      
-      if (!username) {
+      if (!(username || phone)) {
         return res.badRequest({ message: 'Insufficient request parameters! username  is required.' });
       }
       if (!password) {
@@ -87,7 +87,7 @@ const login = async (req, res) => {
       }
 
       let roleAccess = false;
-      let result = await authService.loginUser(username, password, authConstant.PLATFORM.USERAPP, roleAccess);
+      let result = await authService.loginUser((username || phone) , password, authConstant.PLATFORM.USERAPP, roleAccess);
       if (result.flag) {
         return res.badRequest({ message: result.data });
       }
