@@ -1,11 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
-const passport = require('passport');
 const logger = require('morgan');
 const cookieParser = require("cookie-parser")
-const { userappPassportStrategy } = require('./config/userappPassportStrategy');
-const { adminPassportStrategy } = require('./config/adminPassportStrategy');
 
 const path = require('path');
 global.__basedir = __dirname;
@@ -16,6 +13,9 @@ const dotenv = require('dotenv');
 dotenv.config({ path: '.env' });
 
 const dbConnection = require('./config/db');
+const { userappPassportStrategy } = require('./config/userappPassportStrategy');
+const { adminPassportStrategy } = require('./config/adminPassportStrategy');
+const passport = require('passport');
 dbConnection();
 
 var whitelist = ['https://admin.techpyro.com','https://admin.techpyro.in', 'https://techpyro.com', 'https://techpyro.in',  'https://www.techpyro.com', 'https://www.techpyro.in', 'https://contact.techpyro.com', 'https://contact.techpyro.in', 'https://about.techpyro.com', 'https://about.techpyro.in']
@@ -41,7 +41,7 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(passport.initialize());
+app.use(passport.initialize())
 app.use(session({
   secret: 'my-blog-secret',
   resave: true,

@@ -1,8 +1,5 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
-const bcrypt = require("bcrypt");
-const { USER_TYPES } = require("../constants/authConstant");
-const { convertObjectToEnum } = require("../utils/comon");
 
 const myCustomLabels = {
   totalDocs: "itemCount",
@@ -21,47 +18,24 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema(
   {
-    password: {
-      type: String,
-    },
-    name: { type: String },
-    email: {
-      type: String,
-    },
-    phone: {
-      type: Number,
-    },
-
-    userType: {
-      type: Number,
-      enum: convertObjectToEnum(USER_TYPES),
-      required: true,
-    },
-    country_code: {
-      type: Number,
-      default: 91,
-    },
-    picture: {
-      type: String,
-    },
-    loginRetryLimit: {
-      type: Number,
-      default: 0,
-    },
-    loginReactiveTime: { type: Date },
-    courses: [
-      {
-        course_id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "course",
-        },
-      }
-    ]
-      ,
-      credit:{
-        type:Number,
-        default:0
-      },
+name: { type: String },
+    description: { type: String },
+    category: { type: String },
+    image:{type:String},
+    subCategory: { type: String },
+    price: { type: Number },
+    discount: { type: Number },
+    discountStartDate: { type: Date },
+    discountEndDate: { type: Date },
+    startDate: { type: Date },
+    endDate: { type: Date },
+    duration: { type: Number },
+    durationType: { type: String },
+    durationUnit: { type: String },
+    isPaid: { type: Boolean },
+    isPublished: { type: Boolean },
+    isApproved: { type: Boolean },
+  
     createdBy: {
       ref: "user",
       type: Schema.Types.ObjectId,
@@ -97,18 +71,7 @@ const schema = new Schema(
   }
 );
 
-schema.pre("save", async function (next) {
-  this.isDeleted = false;
-  if (this.password) {
-    this.password = await bcrypt.hash(this.password, 8);
-  }
-  next();
-});
 
-schema.methods.isPasswordMatch = async function (password) {
-  const user = this;
-  return bcrypt.compare(password, user.password);
-};
 
 schema.method("toJSON", function () {
   const { _id, __v, ...object } = this.toObject({ virtuals: true });
@@ -118,6 +81,6 @@ schema.method("toJSON", function () {
 });
 
 schema.plugin(mongoosePaginate);
-const user = mongoose.model("user", schema);
+const Course = mongoose.model("course", schema);
 
-module.exports = user;
+module.exports = Course;

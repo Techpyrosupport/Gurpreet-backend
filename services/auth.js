@@ -7,6 +7,7 @@ const common = require("../utils/comon");
 const dayjs = require("dayjs");
 
 const generateToken = async (user, secret) => {
+    console.log("user",user,secret)
     return jwt.sign({ id: user.id, 'email': user.email }, secret, {
         expiresIn: JWT.EXPIRES_IN
     });
@@ -93,6 +94,7 @@ const loginUser = async (username, password, platform, roleAccess) => {
                     return { flag: true, data: 'you are unable to access this platform' }
                 }
                 token = await generateToken(userData, JWT.USERAPP_SECRET)
+                
             }
             else if (platform == PLATFORM.ADMIN) {
                 if (!LOGIN_ACCESS[user.userType].includes(PLATFORM.ADMIN)) {
