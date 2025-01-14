@@ -8,7 +8,7 @@ const dayjs = require("dayjs");
 
 const generateToken = async (user, secret) => {
     console.log("user",user,secret)
-    return jwt.sign({ id: user.id, 'email': user.email }, secret, {
+    return jwt.sign({ id: user.id, 'email': user.email ,"userType":user.userType}, secret, {
         expiresIn: JWT.EXPIRES_IN
     });
 }

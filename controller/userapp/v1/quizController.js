@@ -1,7 +1,4 @@
 
-
-
-
 const quiz = require("../../../model/quiz");
 const user = require("../../../model/user");
 const dbService = require("../../../utils/dbServices");
@@ -9,43 +6,59 @@ const dbService = require("../../../utils/dbServices");
 
 const evaluateQuiz = async (req, res) => {
   try {
-    const { quizId, answers } = req.body; 
+    const { quizId, answers } = req.body;
     const userId = req.user.id;
 
-  
-    const quiz = await dbService.findOne(quiz,quizId);
-    if (!foundquiz){
-      return res.recordNotFound({message: 'Quiz not found.' });
+   
+    const foundQuiz = await dbService.findOne(quiz, { id: quizId });
+    if (!foundQuiz) {
+      return res.recordNotFound({ message: 'Quiz not found.' });
     }
 
-    const user = await dbService.findOne(user,userId);
-    if (!user) {
-      return res.recordNotFound( {message: 'User not found.' });
+  
+    const foundUser = await dbService.findOne(user, { id: userId });
+    if (!foundUser) {
+      return res.recordNotFound({ message: 'User not found.' });
     }
+
+
+    foundUser.credit = foundUser.credit || 0;
+
 
     let totalCreditEarned = 0;
-
-  
-    quiz.questions.forEach((question) => {
-      const userAnswer = answers.find((ans) => ans.questionId === question._id);
+    foundQuiz?.questions?.forEach((question) => {
+      const userAnswer = answers.find((ans) => ans.questionId === question._id.toString());
       if (userAnswer && userAnswer.selectedOption === question.correctOption) {
-        totalCreditEarned += question.credit; 
+        totalCreditEarned += question.credit;
       }
     });
 
- 
-    user.credit += totalCreditEarned;
-    await user.save();
+   
 
-  
+const dataToUpdate = {
+      $inc: {
+        credit: totalCreditEarned,
+      },
+    };
+    
+    const query = { _id: userId};
+      let updatedUser = await dbService.updateOne(user, query, dataToUpdate);
+ 
+
     return res.success({
       message: 'Quiz evaluated successfully.',
+      data: {
+        creditEarned: totalCreditEarned,
+        totalCredit: updatedUser?.credit,
+      },
     });
   } catch (error) {
-    console.error(error);
-    return res.internalServerError({ message:error.message });
+    console.error('Error evaluating quiz:', error);
+    return res.internalServerError({ message: 'An error occurred while evaluating the quiz.' });
   }
 };
+
+
   module.exports = {
    evaluateQuiz
 

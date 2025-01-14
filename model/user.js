@@ -99,7 +99,8 @@ const schema = new Schema(
 
 schema.pre("save", async function (next) {
   this.isDeleted = false;
-  if (this.password) {
+
+  if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 8);
   }
   next();

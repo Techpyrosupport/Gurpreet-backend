@@ -25,18 +25,23 @@ const TopicSchema = new Schema({
     videos:[
         {
             videoId: { type: mongoose.Schema.Types.ObjectId, ref: "video" },
+            order: {
+               type: Number,
+              unique:true ,
+              required: true
+             },
         }
     ],
     quizzes:[
         {
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "quiz" },
+            order: { type: Number,
+              unique:true ,
+              required: true
+            },
         }
     ],
-    codes:[
-        {
-            codeId: { type: mongoose.Schema.Types.ObjectId, ref: "code" },
-        }
-    ],
+
    createdBy: {
         ref: "user",
         type: Schema.Types.ObjectId,
@@ -73,5 +78,5 @@ TopicSchema.method("toJSON", function () {
     return object;
   });
 
-  const Topics = new mongoose.model("topics", TopicSchema);
-  module.exports = Topics;
+  const Topic = new mongoose.model("topic", TopicSchema);
+  module.exports = Topic;

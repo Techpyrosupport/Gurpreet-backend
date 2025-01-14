@@ -16,6 +16,7 @@ const dbConnection = require('./config/db');
 const { userappPassportStrategy } = require('./config/userappPassportStrategy');
 const { adminPassportStrategy } = require('./config/adminPassportStrategy');
 const passport = require('passport');
+const { encryptResponseMiddleware } = require('./middleware/encryptResponse');
 dbConnection();
 
 var whitelist = ['https://admin.techpyro.com','https://admin.techpyro.in', 'https://techpyro.com', 'https://techpyro.in',  'https://www.techpyro.com', 'https://www.techpyro.in', 'https://contact.techpyro.com', 'https://contact.techpyro.in', 'https://about.techpyro.com', 'https://about.techpyro.in']
@@ -27,7 +28,7 @@ var corsOptionsDelegate = function (req, callback) {
     corsOption = { origin: true } // reflect (enable) the requested origin in the CORS response
   } else {
     corsOption = { origin: false } // disable CORS for this request
-  }
+  } 
   console.log('corsOptions', corsOption)
   callback(null, corsOption) // callback expects two parameters: error and options
 }
@@ -41,6 +42,7 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+// app.use(encryptResponseMiddleware)
 app.use(passport.initialize())
 app.use(session({
   secret: 'my-blog-secret',
