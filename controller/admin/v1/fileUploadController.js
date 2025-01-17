@@ -8,6 +8,7 @@ const path = require('path');
 const formidable = require('formidable');
 const AWS = require('aws-sdk');
 const AmazonS3URI = require('amazon-s3-uri');
+const { S3Config, s3 } = require('../../../config/awsConfig');
 
 let allowedFileTypes = [
   'png',
@@ -132,49 +133,38 @@ const upload = async (req,res) => {
  */
 const generatePreSignedURL = async (req, res) => {
   try {
-    if (req.body && req.body.uri){
+    if (req.body && req.body.uri) {
       let uri = req.body.uri;
-      let S3Config = {
-        DO_S3_ACCESS_KEY_ID: process.env.DO_S3_ACCESS_KEY_ID,
-        DO_S3_SECRET_ACCESS_KEY: process.env.DO_S3_SECRET_ACCESS_KEY,
-        DO_S3_REGION: process.env.DO_S3_REGION,
-        DO_S3_BUCKET_NAME: process.env.DO_S3_BUCKET_NAME,
-      };
-
-      const s3 = new AWS.S3({
-        region: S3Config.DO_S3_REGION,
-        accessKeyId: S3Config.DO_S3_ACCESS_KEY_ID,
-        secretAccessKey: S3Config.DO_S3_SECRET_ACCESS_KEY
-      });
-
-      try {
-        const {
-          region, bucket, key
-        } = AmazonS3URI(uri);
-
-        let options = {
-          Bucket: bucket,
-          Key: key,
-          Expires: Number(process.env.AWS_URL_EXPIRATION) || 15 * 60 //in seconds,
+      
+      // Ensure that the URI starts with the DigitalOcean Spaces domain
+      const bucketPrefix = 'https://techpyro-basic-bucket-1.sgp1.cdn.digitaloceanspaces.com/';
+      if (uri.startsWith(bucketPrefix)) {
+        let path = uri.substring(bucketPrefix.length); // Extract the file path
+        
+        const options = {
+          Bucket: process.env.DO_S3_BUCKET_NAME,
+          Key: path,
+          Expires: Number(process.env.AWS_URL_EXPIRATION) || 15 * 60 // Expiry in seconds
         };
 
         await s3.getSignedUrl('getObject', options, (error, url) => {
           if (error) {
-            return res.failure({ message: error });
+            return res.failure({ message: error.message });
           } else {
             return res.success({ data: url });
           }
         });
-      } catch (error) {
-        return res.failure({ message: `${uri} is not a valid S3 uri` });
+      } else {
+        return res.failure({ message: `${uri} is not a valid DigitalOcean Space URL` });
       }
     } else {
-      return res.badRequest({ message : 'Insufficient request parameters! uri is required.' });
+      return res.badRequest({ message: 'Insufficient request parameters! URI is required.' });
     }
   } catch (error) {
-    return res.internalServerError({ message:error.message }); 
+    return res.internalServerError({ message: error.message });
   }
 };
+
 /**
  * @description : upload files
  * @param {Object} file : file to upload
@@ -223,24 +213,12 @@ const uploadFiles = async (file,fields,fileCount) => {
  * @return {Object} : response for file upload to AWS s3
  */
 const uploadToS3 = async (file, fileName) => {
-  let S3Config = {
-    DO_S3_ACCESS_KEY_ID: process.env.DO_S3_ACCESS_KEY_ID,
-    DO_S3_SECRET_ACCESS_KEY: process.env.DO_S3_SECRET_ACCESS_KEY,
-    DO_S3_REGION: process.env.DO_S3_REGION,
-    DO_S3_BUCKET_NAME: process.env.DO_S3_BUCKET_NAME,
-  };
 
-  const s3 = new AWS.S3({
-    endpoint: S3Config.DO_SPACES_URI, 
-    region: S3Config.DO_S3_REGION,
-    credentials:{
-     accessKeyId: S3Config.DO_S3_ACCESS_KEY_ID,
-    secretAccessKey: S3Config.DO_S3_SECRET_ACCESS_KEY
-    }
-  });
+
+  
 
   let params = {
-    Bucket: `${S3Config.DO_S3_BUCKET_NAME}/${process.env.DO_PATH}`,
+    Bucket: process.env.DO_S3_BUCKET_NAME,
     Body: fs.createReadStream(file.filepath),
     Key: fileName,
     ACL: "public-read"
@@ -255,7 +233,7 @@ const uploadToS3 = async (file, fileName) => {
       } else {
         resolve({
           status: true,
-          data: 'https://' + process.env.DO_S3_BUCKET_NAME + '.s3.' + S3Config.DO_S3_REGION + `.amazonaws.com/${process.env.DO_PATH}/` + fileName
+          data:  'https://' + process.env.DO_S3_BUCKET_NAME + '.' + process.env.DO_S3_REGION + `.cdn.digitaloceanspaces.com/${process.env.DO_PATH}/` + fileName
         });
       }
     });

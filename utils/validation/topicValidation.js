@@ -4,7 +4,7 @@ const {
   isCountOnly,
   populate,
   select
-} = require('./commonFilterValidation');
+} = require('./comonFilterValidation');
 
 /** Validation keys and properties of the Topic schema */
 exports.schemaKeys = joi.object({
@@ -15,18 +15,15 @@ exports.schemaKeys = joi.object({
   videos: joi.array().items(
     joi.object({
       videoId: joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
-      order: joi.number().integer().required()
-    })
-  ),
-  quizzes: joi.array().items(
-    joi.object({
-      quizId: joi.string().regex(/^[0-9a-fA-F]{24}$/).required(),
-      order: joi.number().integer().required()
+      quizId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
+      codeId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
+      order: joi.string().valid("video", "quiz").default("video"),
+      serialNo: joi.number().integer().required()
     })
   ),
   createdBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
   updatedBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
-  isAppUser: joi.boolean().default(true),
+  isActive: joi.boolean().default(true),
   isDeleted: joi.boolean().allow(null),
   createdAt: joi.date().iso().allow(null),
   updatedAt: joi.date().iso().allow(null)
@@ -41,18 +38,15 @@ exports.updateSchemaKeys = joi.object({
   videos: joi.array().items(
     joi.object({
       videoId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
-      order: joi.number().integer().allow(null)
-    })
-  ).allow(null),
-  quizzes: joi.array().items(
-    joi.object({
       quizId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
-      order: joi.number().integer().allow(null)
+      codeId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
+      order: joi.string().valid("video", "quiz").allow(null),
+      serialNo: joi.number().integer().allow(null)
     })
   ).allow(null),
   createdBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
   updatedBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null),
-  isAppUser: joi.boolean().allow(null),
+  isActive: joi.boolean().allow(null),
   isDeleted: joi.boolean().allow(null),
   createdAt: joi.date().iso().allow(null),
   updatedAt: joi.date().iso().allow(null),
@@ -69,6 +63,7 @@ exports.findFilterKeys = joi.object({
       description: joi.alternatives().try(joi.array().items(), joi.string(), joi.object()),
       courseId: joi.alternatives().try(joi.array().items(), joi.string().regex(/^[0-9a-fA-F]{24}$/), joi.object()),
       serialKey: joi.alternatives().try(joi.array().items(), joi.number(), joi.object()),
+      isActive: joi.alternatives().try(joi.array().items(), joi.boolean(), joi.object()),
       isDeleted: joi.alternatives().try(joi.array().items(), joi.boolean(), joi.object()),
       createdBy: joi.alternatives().try(joi.array().items(), joi.string().regex(/^[0-9a-fA-F]{24}$/), joi.object()),
       updatedBy: joi.alternatives().try(joi.array().items(), joi.string().regex(/^[0-9a-fA-F]{24}$/), joi.object()),

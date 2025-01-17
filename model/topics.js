@@ -24,21 +24,21 @@ const TopicSchema = new Schema({
     serialKey: { type: Number,unique:true },
     videos:[
         {
-            videoId: { type: mongoose.Schema.Types.ObjectId, ref: "video" },
-            order: {
-               type: Number,
-              unique:true ,
-              required: true
-             },
-        }
-    ],
-    quizzes:[
-        {
+            videoId: { type: mongoose.Schema.Types.ObjectId, ref: "Video" },
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "quiz" },
-            order: { type: Number,
-              unique:true ,
-              required: true
+            codeId:{
+              type: mongoose.Schema.Types.ObjectId, ref: "code"
             },
+            order: {
+               type: String,
+               default:"video",
+               enum: ["video", "quiz"],
+             },
+             serialNo:{
+              type:Number,
+              default:1,
+              unique:true
+             }
         }
     ],
 
@@ -64,12 +64,12 @@ const TopicSchema = new Schema({
           message: "user does not exist.",
         },
       },
-      isAppUser: { type: Boolean, default: true },
+      isActive: { type: Boolean, default: true },
       isDeleted: { type: Boolean },
       createdAt: { type: Date },
       updatedAt: { type: Date },
 })
-
+TopicSchema.plugin(mongoosePaginate);
 
 TopicSchema.method("toJSON", function () {
     const { _id, __v, ...object } = this.toObject({ virtuals: true });

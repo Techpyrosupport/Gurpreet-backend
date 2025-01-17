@@ -11,10 +11,15 @@ const fileUploadController = require('../../../controller/admin/v1/fileUploadCon
 const { catchAsync } = require('../../../utils/errorHandler');
 const { startOrResumeMultipartUpload, generatePreSignedURL } = require('../../../services/s3VideoUplodar');
 const multer = require('multer');
+const auth = require('../../../middleware/auth');
+const { USER_TYPES } = require('../../../constants/authConstant');
+
 
 router.post('/upload',fileUploadController.upload);
 
-router.post('/generate-pre-signed-url',fileUploadController.generatePreSignedURL);
+router.post('/generate-pre-signed-url',
+  auth(USER_TYPES.Admin),
+  fileUploadController.generatePreSignedURL);
 router.post('/generate-pre-signed-video-url',generatePreSignedURL);
 
 const uploadDir = path.join(__dirname, '../../../public/uploads');
@@ -36,6 +41,7 @@ const upload = multer({ storage });
  */
 router.post(
   '/upload-video',
+  auth(USER_TYPES.Admin),
   upload.single('file'),
   catchAsync(async (req, res) => {
     const { file } = req;

@@ -1,6 +1,7 @@
 
 
 
+const Topic = require("../../../model/topics");
 const dbService = require("../../../utils/dbServices");
 const validation = require('../../../utils/validateRequest');
 const ObjectId = require('mongodb').ObjectId;
@@ -166,7 +167,7 @@ const findAllTopics = async (req,res) => {
     let query = {};
     let validateRequest = validation.validateFilterWithJoi(
       req.body,
-      TopicSchemaKey.findFilterKeys,
+    TopicSchemaKey.findFilterKeys,
       Topic.schema.obj
     );
     if (!validateRequest.isValid) {

@@ -53,7 +53,7 @@ const startMultipartUpload = async (fileName) => {
  */
 const uploadPart = async (filePath, uploadId, partNumber, fileName) => {
   try {
-    console.log(`Uploading part ${partNumber} of file ${fileName}...`);
+   
 
     const start = (partNumber - 1) * PART_SIZE;
     const end = Math.min(partNumber * PART_SIZE, fs.statSync(filePath).size) - 1;

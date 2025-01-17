@@ -3,7 +3,6 @@ const session = require('express-session');
 const cors = require('cors');
 const logger = require('morgan');
 const cookieParser = require("cookie-parser")
-
 const path = require('path');
 global.__basedir = __dirname;
 // all routes
@@ -25,9 +24,9 @@ whitelist.push('http://localhost:3001')
 var corsOptionsDelegate = function (req, callback) {
   var corsOption;
   if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOption = { origin: true } // reflect (enable) the requested origin in the CORS response
+    corsOption = { origin: true } 
   } else {
-    corsOption = { origin: false } // disable CORS for this request
+    corsOption = { origin: false } 
   } 
   console.log('corsOptions', corsOption)
   callback(null, corsOption) // callback expects two parameters: error and options
@@ -42,7 +41,7 @@ app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(encryptResponseMiddleware)
+// app.use(encryptResponseMiddleware)
 app.use(passport.initialize())
 app.use(session({
   secret: 'my-blog-secret',

@@ -25,13 +25,13 @@ const addCourse = async (req, res) => {
     return res.unAuthorized({ message: 'Unautherized User' });
 
     let dataToCreate = { ...req.body,createdBy:createdBy.toString() || {} };
-    // let validateRequest = validation.validateParamsWithJoi(
-    //   dataToCreate,
-    //   courseSchemaKey.schemaKeys
-    //   );
-    // if (!validateRequest.isValid) {
-    //   return res.validationError({ message : `Invalid values in parameters, ${validateRequest.message}` });
-    // }
+    let validateRequest = validation.validateParamsWithJoi(
+      dataToCreate,
+      courseSchemaKey.schemaKeys
+      );
+    if (!validateRequest.isValid) {
+      return res.validationError({ message : `Invalid values in parameters, ${validateRequest.message}` });
+    }
 
 
     dataToCreate = new Course(dataToCreate);

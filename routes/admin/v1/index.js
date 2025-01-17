@@ -12,6 +12,8 @@ router.use('/admin/file',require('./uploadRoutes'));
 router.use("/admin/course", require("./courseRoutes"));
 router.use("/admin/quiz",require("./quizRoutes"));
 router.use("/admin/video",require("./videoRoutes"));
+router.use("/admin/topic",require("./topicRoutes"));
+router.use("/admin/onboard",require("./onBoardRoutes"));
 
 
 module.exports = router;
