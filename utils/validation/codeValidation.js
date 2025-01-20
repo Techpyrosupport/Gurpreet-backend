@@ -13,7 +13,7 @@ exports.schemaKeys = joi
       .object()
       .pattern(joi.string().valid("cpp", "python", "java", "javascript"), joi.string())
       .required(),
-    lang: joi.string().valid("cpp", "python", "java", "javascript").required(),
+    lang: joi.string().valid("cpp", "python", "java", "javascript"),
     isActive: joi.boolean(),
     isDeleted: joi.boolean(),
     createdBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).allow(""),
