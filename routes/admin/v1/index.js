@@ -15,6 +15,7 @@ router.use("/admin/video",require("./videoRoutes"));
 router.use("/admin/topic",require("./topicRoutes"));
 router.use("/admin/onboard",require("./onBoardRoutes"));
 router.use("/admin/contact",require("./contactRoutes"));
+router.use("/admin/code",require("./codeRoutes"))
 
 
 module.exports = router;

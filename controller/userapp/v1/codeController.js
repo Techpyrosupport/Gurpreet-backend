@@ -59,7 +59,7 @@ const compileCode = async (req, res) => {
       } while (result.status.id === 1 || result.status.id === 2);
   
      
-      
+
       return res.status(200).json({
         output: result.stdout,
         error: result.stderr,
@@ -71,5 +71,8 @@ const compileCode = async (req, res) => {
       res.status(500).json({ error: "Failed to compile the code." });
     }
 };
+
+
+
 
 module.exports = { compileCode };

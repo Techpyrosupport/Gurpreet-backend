@@ -4,6 +4,7 @@
  */
 
 const Payment = require('../../../model/payment');
+const OnBoard = require('../../../model/onboard')
 const paymentSchemaKey = require('../../../utils/validation/paymentValidation');
 const validation = require('../../../utils/validateRequest');
 const dbService = require('../../../utils/dbServices');
@@ -38,38 +39,72 @@ const checkout = async (req,res) =>{
 * verify payment
 * create payment
 */
-const paymentVerify = async (req,res) =>{ 
-const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body;
+const paymentVerify = async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-const body = razorpay_order_id + "|" + razorpay_payment_id;
-const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_API_SECRET)
-                            .update(body.toString())
-                            .digest('hex');
-const isAuthentic =  expectedSignature === razorpay_signature     
-
-if(isAuthentic){
  
-  try {
-    let dataToCreate = { order_id:razorpay_order_id,payment_id:razorpay_payment_id,signature:razorpay_signature};
-    dataToCreate.paymentStatus="success";
-    dataToCreate = new Payment(dataToCreate);
-    let foundOrder = await dbService.findOne(Payment,{order_id:razorpay_order_id});
-   
-    if(!foundOrder){
-      let createdPayment = await dbService.create(Payment,dataToCreate);
-      res.redirect(`${process.env.RAZORPAY_REDIRECTURL}?payment_id=${createdPayment.id}`);
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_API_SECRET)
+    .update(body.toString())
+    .digest("hex");
 
-    } else{
+  const isAuthentic = expectedSignature === razorpay_signature;
+
+  if (isAuthentic) {
+    try {
+   
+      let foundPayment = await dbService.findOne(Payment, { order_id: razorpay_order_id });
+
+      if (!foundPayment) {
+     
+        let paymentData = {
+          order_id: razorpay_order_id,
+          payment_id: razorpay_payment_id,
+          signature: razorpay_signature,
+          status: "success",
+        };
+
+        paymentData = new Payment(paymentData);
+        const createdPayment = await dbService.create(Payment, paymentData);
+
+        
+        let foundOnBoard = await dbService.findOne(OnBoard, { order_id: razorpay_order_id });
+
+        if (foundOnBoard) {
+          foundOnBoard.status = "success"; 
+          await foundOnBoard.save();
+        }
+
+       
+        res.redirect(`${process.env.RAZORPAY_REDIRECTURL}?payment_id=${createdPayment.id}`);
+      } else {
+        
+        foundPayment.payment_id = razorpay_payment_id;
+        foundPayment.signature = razorpay_signature;
+        foundPayment.status = "success";
+        await foundPayment.save();
+
+       
+        let foundOnBoard = await dbService.findOne(OnBoard, { order_id: razorpay_order_id });
+
+        if (foundOnBoard) {
+          foundOnBoard.status = "success"; 
+          await foundOnBoard.save();
+        }
+
+  
+        res.redirect(`${process.env.RAZORPAY_REDIRECTURL}?payment_id=${foundPayment.id}`);
+      }
+    } catch (error) {
+      console.error("Error during payment processing:", error);
       res.redirect(`${process.env.RAZORPAY_ERRORURL}`);
     }
-  } catch (error) {
+  } else {
+   
     res.redirect(`${process.env.RAZORPAY_ERRORURL}`);
   }
-} else{
-  res.redirect(`${process.env.RAZORPAY_ERRORURL}`);
-}
- 
-}
+};
 
    
 /**

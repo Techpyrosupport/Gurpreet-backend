@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate-v2');
-let idValidator = require('mongoose-id-validator');
-const uniqueValidator = require('mongoose-unique-validator');
 
 const myCustomLabels = {
     totalDocs: 'itemCount',
@@ -83,6 +81,6 @@ const myCustomLabels = {
     return object;
   });
   schema.plugin(mongoosePaginate);
-  schema.plugin(idValidator);
+
   const payment = mongoose.model('payment',schema);
   module.exports = payment;
