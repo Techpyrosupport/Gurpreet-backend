@@ -224,6 +224,29 @@ const getCourseCount = async (req,res) => {
   }
 };
 
+ /**
+ * @description : delete documents of Course in table by using ids.
+ * @param {Object} req : request including array of ids in request body.
+ * @param {Object} res : response contains no of documents deleted.
+ * @return {Object} : no of documents deleted. {status, message, data}
+ */
+ const deleteManyCourse = async (req, res) => {
+  try {
+    let ids = req.body.ids;
+    if (!ids || !Array.isArray(ids) || ids.length < 1) {
+      return res.badRequest();
+    }
+    const query = { _id:{ $in:ids } };
+    const deletedCourse = await dbService.deleteMany(Course,query);
+    if (!deletedCourse){
+      return res.recordNotFound();
+    }
+    return res.success({ data :{ count :deletedCourse } });
+  } catch (error){
+    return res.internalServerError({ message:error.message }); 
+  }
+};
+
   module.exports = {
     getCourse,
     addCourse,
@@ -231,6 +254,7 @@ const getCourseCount = async (req,res) => {
     deleteCourse,
     softDeleteCourse,
     findAllCourses,
-    getCourseCount
+    getCourseCount,
+    deleteManyCourse
 
 }

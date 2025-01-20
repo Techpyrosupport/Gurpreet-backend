@@ -43,8 +43,8 @@ const myCustomLabels = {
     type:String,
    },
 
-      isActive: { type: Boolean },
-      isDeleted: { type: Boolean },
+   isActive:{type:Boolean,default:true},
+      isDeleted: { type: Boolean,default:false},
       createdAt: { type: Date },
       updatedAt: { type: Date },
      

@@ -28,6 +28,8 @@ const myCustomLabels = {
     paymentChannel:{type:String},
     currentPayment:{type:Number},
     totalPayment:{type:Number},
+    order_id:{type:String},
+    payment_id:{type:String},
     status: { type: String, enum: ['pending', 'success', 'failed', 'refunded', 'partial'], default: 'pending' },
     addedBy: {
         ref: 'user',
@@ -38,8 +40,8 @@ const myCustomLabels = {
         type: Schema.Types.ObjectId
       },
       isAppUser: { type: Boolean, default: true },
-      isActive: { type: Boolean },
-      isDeleted: { type: Boolean },
+      isActive:{type:Boolean,default:true},
+      isDeleted: { type: Boolean,default:false},
       createdAt: { type: Date },
       updatedAt: { type: Date },
      

@@ -12,7 +12,8 @@ router.use('/userapp/course',require("./courseRoutes"))
 router.use('/userapp/quiz',require("./quizRouter"))
 router.use('/userapp/aiResponse',require("./aiResponseRoute"))
 router.use('/userapp/onboard',require("./onBoardRoute"))
-
+router.use('/userapp/contact' ,require('./contactRoutes'));
+router.use('/userapp/code',require("./codeRoutes"))
 
 
 

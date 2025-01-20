@@ -36,8 +36,7 @@ const TopicSchema = new Schema({
              },
              serialNo:{
               type:Number,
-              default:1,
-              unique:true
+              default:1
              }
         }
     ],
@@ -64,8 +63,8 @@ const TopicSchema = new Schema({
           message: "user does not exist.",
         },
       },
-      isActive: { type: Boolean, default: true },
-      isDeleted: { type: Boolean },
+      isActive:{type:Boolean,default:true},
+      isDeleted: { type: Boolean,default:false},
       createdAt: { type: Date },
       updatedAt: { type: Date },
 })

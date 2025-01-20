@@ -2,63 +2,97 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const logger = require('morgan');
-const cookieParser = require("cookie-parser")
+const cookieParser = require('cookie-parser');
 const path = require('path');
-global.__basedir = __dirname;
-// all routes
-const routes = require("./routes")
-
 const dotenv = require('dotenv');
+const passport = require('passport');
+
+// Load environment variables
 dotenv.config({ path: '.env' });
 
+// Database connection and strategies
 const dbConnection = require('./config/db');
 const { userappPassportStrategy } = require('./config/userappPassportStrategy');
 const { adminPassportStrategy } = require('./config/adminPassportStrategy');
-const passport = require('passport');
+
+// Routes and middleware
+const routes = require('./routes');
 const { encryptResponseMiddleware } = require('./middleware/encryptResponse');
+const responseHandler = require('./utils/response/responseHandler');
+
+// Initialize the app and database connection
+const app = express();
 dbConnection();
 
-var whitelist = ['https://admin.techpyro.com','https://admin.techpyro.in', 'https://techpyro.com', 'https://techpyro.in',  'https://www.techpyro.com', 'https://www.techpyro.in', 'https://contact.techpyro.com', 'https://contact.techpyro.in', 'https://about.techpyro.com', 'https://about.techpyro.in']
-whitelist.push('http://localhost:3000')
-whitelist.push('http://localhost:3001')
-var corsOptionsDelegate = function (req, callback) {
-  var corsOption;
-  if (whitelist.indexOf(req.header('Origin')) !== -1) {
-    corsOption = { origin: true } 
-  } else {
-    corsOption = { origin: false } 
-  } 
-  console.log('corsOptions', corsOption)
-  callback(null, corsOption) // callback expects two parameters: error and options
-}
+// Define the base directory for global use
+global.__basedir = __dirname;
 
+// Whitelist for CORS
+const whitelist = [
+  'https://admin.techpyro.com',
+  'https://admin.techpyro.in',
+  'https://techpyro.com',
+  'https://techpyro.in',
+  'https://www.techpyro.com',
+  'https://www.techpyro.in',
+  'https://contact.techpyro.com',
+  'https://contact.techpyro.in',
+  'https://about.techpyro.com',
+  'https://about.techpyro.in',
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
 
-const app = express();
-const port = process.env.PORT || 8000;
+// CORS options
+const corsOptionsDelegate = function (req, callback) {
+  const corsOptions = whitelist.includes(req.header('Origin'))
+    ? { origin: true }
+    : { origin: false };
+  console.log('CORS options:', corsOptions);
+  callback(null, corsOptions); // Pass error and options
+};
 
-app.use(require('./utils/response/responseHandler'));
-app.use(cors());
+// Middleware setup
+app.use(cors(corsOptionsDelegate));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(encryptResponseMiddleware)
-app.use(passport.initialize())
-app.use(session({
-  secret: 'my-blog-secret',
-  resave: true,
-  saveUninitialized: false
-}));
-app.use(cookieParser())
-app.use(routes)
+app.use(cookieParser());
+app.use(responseHandler); // Attach the custom response handler
 
-
-// app.set('view engine', 'ejs');
-// app.set('views', path.join(__dirname, 'views'));
-
+// Initialize Passport strategies
+app.use(passport.initialize());
 userappPassportStrategy(passport);
 adminPassportStrategy(passport);
 
+// Session configuration
+app.use(
+  session({
+    secret: 'my-blog-secret',
+    resave: true,
+    saveUninitialized: false,
+  })
+);
 
-    app.listen(port, () => {
-      console.log(`your application is running on ${port}`);
+// Static file serving
+app.use('/codemirror-5.65.18', express.static(path.join(__dirname, 'codemirror-5.65.18')));
+
+
+app.use('/compiler',(req, res) => {
+  if (typeof compiler !== 'undefined' && typeof compiler.flush === 'function') {
+    compiler.flush(() => {
+      console.log('Temporary files deleted');
     });
+  }
+  console.log("hello from compiler")
+  res.sendFile(path.join(__dirname, 'index.html'));
+})
+
+// Attach application routes
+app.use(routes);
+
+// Server start
+const port = process.env.PORT || 8000;
+app.listen(port, () => {
+  console.log(`Your application is running on port ${port}`);
+});

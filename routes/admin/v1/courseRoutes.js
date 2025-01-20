@@ -15,6 +15,7 @@ router.post("/list",auth(PLATFORM.ADMIN),findAllCourses);
 router.get("/get/:id",getCourse);
 router.delete("/delete/:id",auth(PLATFORM.ADMIN),deleteCourse);
 router.put("/soft-delete/:id",auth(PLATFORM.ADMIN),deleteCourse);
+router.delete("/delete-many",auth(PLATFORM.ADMIN),deleteCourse);
 router.put("/update/:id",auth(PLATFORM.ADMIN),updateCourse);
 router.post("/count",auth(PLATFORM.ADMIN),getCourseCount)
 
