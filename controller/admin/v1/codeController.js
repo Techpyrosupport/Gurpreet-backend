@@ -18,23 +18,35 @@ const common = require('../../../utils/comon');
  * @param {Object} res : response of created document
  * @return {Object} : created Code. {status, message, data}
  */ 
-const addCode = async (req, res) => {
+ const addCode = async (req, res) => {
     try {
+        console.log(req.body)
       let dataToCreate = { ...req.body || {} };
-      let validateRequest = validation.validateParamsWithJoi(
-        dataToCreate,
-         CodeSchemaKey.schemaKeys);
+  
+      // Validate the request body
+      const validateRequest = validation.validateParamsWithJoi(dataToCreate, CodeSchemaKey.schemaKeys);
       if (!validateRequest.isValid) {
-        return res.validationError({ message : `Invalid values in parameters, ${validateRequest.message}` });
+        return res.validationError({ message: `Invalid values in parameters, ${validateRequest.message}` });
       }
+  
+      // Convert `inputs` to a Map if it's an object
+      if (dataToCreate.inputs && typeof dataToCreate.inputs === 'object') {
+        dataToCreate.inputs = new Map(Object.entries(dataToCreate.inputs));
+      }
+  
+      // Add user information
       dataToCreate.addedBy = req.user.id;
-      dataToCreate = new Code(dataToCreate);
-      let createdCode = await dbService.create(Code,dataToCreate);
-      return res.success({ data : createdCode });
+  
+      // Create and save the document
+      let createdCode = new Code(dataToCreate);
+      createdCode = await createdCode.save();
+  
+      return res.success({ data: createdCode });
     } catch (error) {
-      return res.internalServerError({ message:error.message }); 
+      return res.internalServerError({ message: error.message });
     }
   };
+  
  
   /**
  * @description : create multiple documents of Code in mongodb collection.

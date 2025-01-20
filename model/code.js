@@ -43,17 +43,18 @@ const schema = new Schema(
 );
 
 
-schema.virtual("selectedInput").get(function () {
-  return this.inputs?.get(this.lang) || "No code available for the selected language.";
-});
 
-// Modify the `toJSON` method for cleaner output
 schema.method("toJSON", function () {
-  const { _id, __v, inputs, ...object } = this.toObject({ virtuals: true });
-  object.id = _id;
-  object.selectedInput = this.selectedInput; 
-  return object;
-});
+    const { _id, __v, inputs, ...object } = this.toObject({ virtuals: true });
+    object.id = _id;
+    
+    // Include `inputs` after converting it back to an object
+    if (inputs instanceof Map) {
+      object.inputs = Object.fromEntries(inputs);
+    }
+  
+    return object;
+  });
 
 // Apply the pagination plugin
 schema.plugin(mongoosePaginate);
