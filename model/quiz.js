@@ -25,10 +25,7 @@ const quizSchema = new Schema(
     description: {
       type: String,
     },
-    order:{
-      type:Number,
-default:0
-    },
+    
     
     questions: [
       {

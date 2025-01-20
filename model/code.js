@@ -13,23 +13,24 @@ const myCustomLabels = {
   meta: "paginator",
 };
 
+
 mongoosePaginate.paginate.options = { customLabels: myCustomLabels };
+
 const Schema = mongoose.Schema;
+
 
 const schema = new Schema(
   {
-
-    input:{
-        type: String,
+    inputs: {
+      type: Map,
+      of: String, 
     },
-    lang:{
-        type:String,
-        enum: ["cpp", "python", "java", "javascript"],
+    lang: {
+      type: String,
+      enum: ["cpp", "python", "java", "javascript"]
     },
-    
-
     isActive: { type: Boolean, default: true },
-    isDeleted: { type: Boolean,default:false},
+    isDeleted: { type: Boolean, default: false },
     createdAt: { type: Date },
     updatedAt: { type: Date },
   },
@@ -42,15 +43,22 @@ const schema = new Schema(
 );
 
 
+schema.virtual("selectedInput").get(function () {
+  return this.inputs?.get(this.lang) || "No code available for the selected language.";
+});
 
+// Modify the `toJSON` method for cleaner output
 schema.method("toJSON", function () {
-  const { _id, __v, ...object } = this.toObject({ virtuals: true });
+  const { _id, __v, inputs, ...object } = this.toObject({ virtuals: true });
   object.id = _id;
-  delete object.password;
+  object.selectedInput = this.selectedInput; 
   return object;
 });
 
+// Apply the pagination plugin
 schema.plugin(mongoosePaginate);
-const Code = mongoose.model("code", schema);
+
+// Create the model
+const Code = mongoose.model("Code", schema);
 
 module.exports = Code;

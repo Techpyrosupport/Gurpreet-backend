@@ -11,7 +11,7 @@ exports.schemaKeys = joi
   .object({
     title: joi.string().allow(null).allow(""),
     description: joi.string().allow(null).allow(""),
-    order: joi.number().integer().min(0),
+  
     questions: joi
       .array()
       .items(
@@ -42,7 +42,7 @@ exports.updateSchemaKeys = joi
   .object({
     title: joi.string().allow(null).allow(""),
     description: joi.string().allow(null).allow(""),
-    order: joi.number().integer().min(0),
+  
     questions: joi
       .array()
       .items(
@@ -89,11 +89,7 @@ exports.findFilterKeys = joi
               joi.string(),
               joi.object()
             ),
-            order: joi.alternatives().try(
-              joi.array().items(joi.number().integer()),
-              joi.number().integer(),
-              joi.object()
-            ),
+            
             createdBy: joi.alternatives().try(
               joi.array().items(
                 joi.string().regex(/^[0-9a-fA-F]{24}$/)
