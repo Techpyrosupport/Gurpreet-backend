@@ -48,7 +48,7 @@ schema.method("toJSON", function () {
     const { _id, __v, inputs, ...object } = this.toObject({ virtuals: true });
     object.id = _id;
     
-    // Include `inputs` after converting it back to an object
+  
     if (inputs instanceof Map) {
       object.inputs = Object.fromEntries(inputs);
     }
@@ -56,10 +56,10 @@ schema.method("toJSON", function () {
     return object;
   });
 
-// Apply the pagination plugin
+
 schema.plugin(mongoosePaginate);
 
-// Create the model
+
 const Code = mongoose.model("Code", schema);
 
 module.exports = Code;
