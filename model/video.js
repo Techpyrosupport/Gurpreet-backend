@@ -47,6 +47,10 @@ const videoSchema = new Schema(
         type: [String],
         default: [],
       },
+       userId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'user',
+          },
     createdBy: {
       ref: "user",
       type: Schema.Types.ObjectId,

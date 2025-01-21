@@ -86,7 +86,7 @@ const updateCourse = async (req, res) => {
        
 
 
-      let dataToUpdate = { ...req.body, };
+      let dataToUpdate = { ...req.body };
       let validateRequest = validation.validateParamsWithJoi(
         dataToUpdate,
         courseSchemaKey.updateSchemaKeys

@@ -19,9 +19,17 @@ mongoosePaginate.paginate.options = { customLabels: myCustomLabels };
 const Schema = mongoose.Schema;
 const TopicSchema = new Schema({
     name: { type: String, required: true },
+     userId:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'user',
+        },
     description: { type: String, required: true },
     courseId: { type: mongoose.Schema.Types.ObjectId, ref: "course" },
     serialKey: { type: Number,unique:true },
+     userId:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'user',
+        },
     videos:[
         {
             videoId: { type: mongoose.Schema.Types.ObjectId, ref: "Video" },

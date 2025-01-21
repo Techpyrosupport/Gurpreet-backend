@@ -19,14 +19,16 @@ const Schema = mongoose.Schema;
 
 const quizSchema = new Schema(
   {
+    userId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    },
     title: {
       type: String,
     },
     description: {
       type: String,
     },
-    
-    
     questions: [
       {
         questionText: {

@@ -29,6 +29,9 @@ const schema = new Schema(
       type: String,
       enum: ["cpp", "python", "java", "javascript"]
     },
+    credit:{
+        type: Number
+    },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
     createdAt: { type: Date },

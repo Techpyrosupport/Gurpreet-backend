@@ -14,6 +14,7 @@ exports.schemaKeys = joi
       .pattern(joi.string().valid("cpp", "python", "java", "javascript"), joi.string())
       .required(),
     lang: joi.string().valid("cpp", "python", "java", "javascript"),
+      userId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).allow(""),
     isActive: joi.boolean(),
     isDeleted: joi.boolean(),
     createdBy: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).allow(""),
@@ -28,6 +29,7 @@ exports.updateSchemaKeys = joi
       .object()
       .pattern(joi.string().valid("cpp", "python", "java", "javascript"), joi.string())
       .allow(null),
+      userId: joi.string().regex(/^[0-9a-fA-F]{24}$/).allow(null).allow(""),
     lang: joi.string().valid("cpp", "python", "java", "javascript").allow(null),
     isActive: joi.boolean(),
     isDeleted: joi.boolean(),
@@ -62,7 +64,13 @@ exports.findFilterKeys = joi
               joi.boolean(),
               joi.object()
             ),
+            
             createdBy: joi.alternatives().try(
+              joi.array().items(joi.string().regex(/^[0-9a-fA-F]{24}$/)),
+              joi.string().regex(/^[0-9a-fA-F]{24}$/),
+              joi.object()
+            ),
+            userId: joi.alternatives().try(
               joi.array().items(joi.string().regex(/^[0-9a-fA-F]{24}$/)),
               joi.string().regex(/^[0-9a-fA-F]{24}$/),
               joi.object()
