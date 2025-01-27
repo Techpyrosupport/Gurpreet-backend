@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
 
@@ -30,7 +31,12 @@ const schema = new Schema(
       enum: ["cpp", "python", "java", "javascript"]
     },
     credit:{
-        type: Number
+      type:Number,
+      default:0
+    },
+    addedBy:{
+       type: Schema.Types.ObjectId,
+      ref:"user"
     },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },

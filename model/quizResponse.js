@@ -17,35 +17,26 @@ const myCustomLabels = {
 mongoosePaginate.paginate.options = { customLabels: myCustomLabels };
 const Schema = mongoose.Schema;
 
-const quizSchema = new Schema(
+const quizResponseSchema = new Schema(
   {
-   
-    title: {
-      type: String,
-    },
-    description: {
-      type: String,
-    },
-    questions: [
-      {
-        questionText: {
-          type: String,
+   quizId:{
+    type: Schema.Types.ObjectId,
+    ref: 'quiz',
+   },
+   userId:{
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+   },
+   questions:[
+    {
+        questionId:{
+            type: Schema.Types.ObjectId,
         },
-        options: [
-          {
-            optionText: {
-              type: String,
+        answer:{
+            type:String
             },
-          },
-        ],
-        credit: {
-          type: Number,
-        },
-        correctOption: {
-          type: Number,
-        }
-      },
-    ],
+    }
+   ],
     createdBy: {
       ref: "user",
       type: Schema.Types.ObjectId,
@@ -81,9 +72,8 @@ const quizSchema = new Schema(
   }
 );
 
-quizSchema.method("toJSON", function () {
+quizResponseSchema.method("toJSON", function () {
   const { _id, __v, ...object } = this.toObject({ virtuals: true });
-
 
  
   if (object.questions && Array.isArray(object.questions)) {
@@ -92,12 +82,13 @@ quizSchema.method("toJSON", function () {
       return { ...rest, id: _id };
     });
   }
+
   object.id = _id;
-  delete object.password;
   return object;
 });
 
-quizSchema.plugin(mongoosePaginate);
 
-module.exports = mongoose.model("quiz", quizSchema);
+quizResponseSchema.plugin(mongoosePaginate);
+
+module.exports = mongoose.model("quizresponse", quizResponseSchema);
 

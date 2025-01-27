@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 const mongoosePaginate = require("mongoose-paginate-v2");
 
@@ -15,37 +14,33 @@ const myCustomLabels = {
 };
 
 mongoosePaginate.paginate.options = { customLabels: myCustomLabels };
+
 const Schema = mongoose.Schema;
 
-const quizSchema = new Schema(
+const codeResponseSchema = new Schema(
   {
-   
-    title: {
-      type: String,
+    codeId: {
+      type: Schema.Types.ObjectId,
+      ref: "Code",
+      required: true,
     },
-    description: {
-      type: String,
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
     },
-    questions: [
-      {
-        questionText: {
-          type: String,
-        },
-        options: [
-          {
-            optionText: {
-              type: String,
-            },
-          },
-        ],
-        credit: {
-          type: Number,
-        },
-        correctOption: {
-          type: Number,
-        }
+    creditsEarned: {
+      type: Boolean,
+      default: false, 
+    },
+    lang: {
+        type: String,
+        enum: ["cpp", "python", "java", "javascript"]
       },
-    ],
+    inputs: {
+      type: Map,
+      of: String,
+    },
     createdBy: {
       ref: "user",
       type: Schema.Types.ObjectId,
@@ -54,7 +49,7 @@ const quizSchema = new Schema(
           const id = await mongoose.model("user").findById(value);
           return !!id;
         },
-        message: "User does not exist.", 
+        message: "User does not exist.",
       },
     },
     updatedBy: {
@@ -65,11 +60,12 @@ const quizSchema = new Schema(
           const id = await mongoose.model("user").findById(value);
           return !!id;
         },
-        message: "User does not exist.", 
+        message: "User does not exist.",
       },
     },
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean, default: false },
+   
     createdAt: { type: Date },
     updatedAt: { type: Date },
   },
@@ -81,23 +77,8 @@ const quizSchema = new Schema(
   }
 );
 
-quizSchema.method("toJSON", function () {
-  const { _id, __v, ...object } = this.toObject({ virtuals: true });
 
 
- 
-  if (object.questions && Array.isArray(object.questions)) {
-    object.questions = object.questions.map((q) => {
-      const { _id, ...rest } = q;
-      return { ...rest, id: _id };
-    });
-  }
-  object.id = _id;
-  delete object.password;
-  return object;
-});
+codeResponseSchema.plugin(mongoosePaginate);
 
-quizSchema.plugin(mongoosePaginate);
-
-module.exports = mongoose.model("quiz", quizSchema);
-
+module.exports = mongoose.model("coderesponse", codeResponseSchema);

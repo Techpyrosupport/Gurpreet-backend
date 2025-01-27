@@ -139,12 +139,12 @@ const generatePreSignedURL = async (req, res) => {
       // Ensure that the URI starts with the DigitalOcean Spaces domain
       const bucketPrefix = 'https://techpyro-basic-bucket-1.sgp1.cdn.digitaloceanspaces.com/';
       if (uri.startsWith(bucketPrefix)) {
-        let path = uri.substring(bucketPrefix.length); // Extract the file path
+        let path = uri.substring(bucketPrefix.length); 
         
         const options = {
           Bucket: process.env.DO_S3_BUCKET_NAME,
-          Key: path,
-          Expires: Number(process.env.AWS_URL_EXPIRATION) || 15 * 60 // Expiry in seconds
+          Key: path
+          
         };
 
         await s3.getSignedUrl('getObject', options, (error, url) => {

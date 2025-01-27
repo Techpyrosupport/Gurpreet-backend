@@ -1,14 +1,27 @@
 const Code = require("../../../model/code"); 
 const axios = require("axios");
-const dbServices = require("../../../utils/dbServices")
+const dbServices = require("../../../utils/dbServices");
+const User = require("../../../model/user");
+const codeResponse = require("../../../model/codeResponse");
+const { isValidObjectId } = require("mongoose");
 
 const compileCode = async (req, res) => {
-  const { code, language, input,  codeId } = req.body;
-const userId = req.user.id;
-  if (!code || !language) {
-    return res.status(400).json({ error: "Code and language are required." });
-  }
+  const { code, language, input, codeId } = req.body;
+  const userId = req.user.id;
 
+  if (!code || !language) {
+    return res.status(400).json({ message: "Code and language are required." });
+  }
+  if (!codeId) {
+    return res.status(400).json({ message: "CodeId is required." });
+  }
+  let query = {};
+  query._id = codeId;
+  let options = {};
+  let existingCodeOnlywithId = await dbServices.findOne(Code,query, options);
+  if (!existingCodeOnlywithId ){
+    return res.recordNotFound();
+  }
   try {
     const languageMap = {
       cpp: 54,
@@ -28,8 +41,8 @@ const userId = req.user.id;
       language_id: languageId,
     };
 
-    // Make submission request
-    const response = await axios.post(
+    // Request to compile the code
+    const compileResponse = await axios.post(
       `https://${process.env.RAPIDAPI_HOST}/submissions`,
       payload,
       {
@@ -41,9 +54,7 @@ const userId = req.user.id;
       }
     );
 
-    const { token } = response.data;
-
-    // Poll for result
+    const { token } = compileResponse.data;
     let result;
     do {
       const resultResponse = await axios.get(
@@ -58,68 +69,122 @@ const userId = req.user.id;
       result = resultResponse.data;
     } while (result.status.id === 1 || result.status.id === 2);
 
-    // Check compilation status
+  
+    const existingCodeResponse = await codeResponse.findOne({ codeId, userId });
 
-      // Check if a document exists for the user and codeId
-      let existingCode;
-      if (codeId) {
-        existingCode = await Code.findOne({ _id: codeId, userId: userId });
-      }
-
-      if (existingCode) {
-        // Update existing document
-        existingCode.lang = language;
-        existingCode.inputs = new Map(Object.entries({ ...existingCode.inputs, input }));
-        existingCode.updatedAt = new Date();
-        await existingCode.save();
-        return res.status(200).json({
-          message: "Code updated successfully.",
-          data: existingCode,
-        });
-      } else {
-       
-        // cradit add to user table if  sucessfully run
-        if (result.status.description === "Accepted" && !result.stderr && !result.compile_output) {
-         
-const query = { id: userId };
-const foundUser = await dbServices.findOne(Code, query);
-if (foundUser) {
-  const existingCodeCredit = existingCode ? existingCode.credit : 0;
-  const totalCredit = foundUser.credit + existingCodeCredit;
-  console.log(totalCredit, "totalCredit");
-  const updateCredit = await dbServices.updateOne(Code, query, { credit: totalCredit });
-}
+    if (existingCodeResponse) {
+      const { creditsEarned, lang, inputs } = existingCodeResponse;
 
     
+      if (result.status.id === 3 && !creditsEarned) {
+      
+       
 
+
+        const user = await dbServices.findOne(User, { id: userId });
+
+        if (user) {
+          const totalCredit = user.credit + existingCodeOnlywithId.credit;
+
+      
+      const userwithupdatedCredit=    await dbServices.updateOne(User, { id: userId }, { $set: { credit: totalCredit } });
+      console.log(userwithupdatedCredit,"userWith updted credit")
+          existingCodeResponse.creditsEarned = true;
+          await existingCodeResponse.save();
         }
-        const newCode = new Code({
-          lang: language,
-          inputs: new Map(Object.entries({ input })),
-          isActive: true,
-          addedBy: userId,
-        });
-        const createdCode = await newCode.save();
-        return res.status(201).json({
-          message: "Code compiled and saved successfully.",
-          data: createdCode,
-        });
       }
+
+      return res.status(200).json({
+        message: result.status.id === 3 ? "Code compiled successfully" : "Code compilation failed.",
+        output: result.stdout,
+      });
+    } else {
+     
+      const updatedInputs = {
+        ...(existingCodeOnlywithId?.inputs ? Object.fromEntries(existingCodeOnlywithId.inputs) : {}),
+        [language]: code,
+      };
+
+      const newCodeResponse = new codeResponse({
+        codeId,
+        lang: language,
+        inputs: updatedInputs,
+        userId,
+        createdBy: userId,
+        creditsEarned: result.status.id === 3, 
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      await newCodeResponse.save();
+      return res.status(200).json({
+        message: result.status.id === 3 ? "Code compiled successfully" : "Code compilation failed.",
+        output: result.stdout,
+      });
+    }
+
   } catch (error) {
     console.error("Error compiling code:", error.message);
-    return res.status(500).json({ error: "Failed to compile the code." });
+    return res.status(500).json({ message: error.message });
   }
 };
 
 
-const getCode = async(req,res)=>{
+/**
+ * @description : find document of CodeResponse from table by CodeId and userid;
+ * @param {Object} req : request including id in request params.
+ * @param {Object} res : response contains document retrieved from table.
+ * @return {Object} : found CodeResponse. {status, message, data}
+ */
+const getCodeResponse = async (req, res) => {
   try {
-    const id = req.params.id;
-    const userId = req.user.id;
+    const codeId = req.params.id;
+    const userId = req.user.id; 
+
+ 
+    if (!isValidObjectId(codeId)) {
+      return res.validationError({ message: 'Invalid CodeId.' });
+    }
+
+
+    const query = {
+      codeId,
+      userId,
+    };
+
+  
+    const foundCodeResponse = await codeResponse.findOne(query).populate({
+      path: 'codeId',
+      select: 'inputs lang ',
+    });
+console.log(foundCodeResponse,"foundCodeResponse")
+    if (!foundCodeResponse) {
+    
+    let foundCode = await dbServices.findOne(Code, { _id: codeId });
+
+      if (!foundCode) {
+        return res.recordNotFound({ message: 'Code not found.' });
+      }
+
+      foundData ={
+        foundCode
+      }
+     
+      return res.success({ data: foundCode });
+    }else{
+      return res.success({ data: foundCodeResponse });
+    }
+
+ 
 
   } catch (error) {
-    return res.internalServerError({data:error.message})
+    console.error('Error fetching Code response:', error);
+    return res.internalServerError({ message: error.message });
   }
-}
+};
 
-module.exports = { compileCode };
+
+module.exports = { 
+  compileCode,
+  getCodeResponse,
+ };
