@@ -5,11 +5,11 @@ const {
 
 /** Validation keys and properties of the Contact schema */
 exports.schemaKeys = joi.object({
-  name: joi.string().required(),
-  email: joi.string().email().required(),
-  phone: joi.string().pattern(/^[0-9]+$/).min(10).max(15).required(),
-  topic: joi.string().required(),
-  message: joi.string().required(),
+  name: joi.string(),
+  email: joi.string().email(),
+  phone: joi.string().pattern(/^[0-9]+$/).min(10).max(15),
+  topic: joi.string(),
+  message: joi.string(),
   profession: joi.string().allow(null).allow(''),
   isAppUser: joi.boolean(),
   isDeleted: joi.boolean().allow(null),

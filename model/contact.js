@@ -30,7 +30,15 @@ message:{
 profession:{
     type:String
 },
-
+startTime:{
+  type:String
+},
+endTime:{
+  type:String
+},
+preferredDate: {
+  type: String,
+},
   
     isActive: { type: Boolean, default: true },
     isDeleted: { type: Boolean,default:false},
