@@ -32,7 +32,7 @@ const TopicSchema = new Schema({
             videoId: { type: mongoose.Schema.Types.ObjectId, ref: "Video" },
             quizId: { type: mongoose.Schema.Types.ObjectId, ref: "quiz" },
             codeId:{
-              type: mongoose.Schema.Types.ObjectId, ref: "code"
+              type: mongoose.Schema.Types.ObjectId, ref: "Code"
             },
             order: {
                type: String,
